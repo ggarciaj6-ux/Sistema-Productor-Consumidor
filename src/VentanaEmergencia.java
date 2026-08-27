@@ -5,17 +5,20 @@ public class VentanaEmergencia extends JFrame {
     private JButton btnPlay, btnStop;
     private JProgressBar barraBuffer;
     private JLabel lblEstadoBuffer;
-    private JLabel lblSemProd, lblSemMed1, lblSemMed2;
-    private JLabel lblMed1, lblMed2;
+
+    // Semáforos
+    private JLabel lblSemProd, lblSemMed1, lblSemMed2, lblSemMed3;
+    // Textos de estado de los médicos
+    private JLabel lblMed1, lblMed2, lblMed3;
 
     private BufferEmergencia buffer;
     private ProductorPacientes productor;
-    private MedicoConsumidor medico1, medico2;
-    private final int CAPACIDAD_MAXIMA = 6;
+    private MedicoConsumidor medico1, medico2, medico3; // <-- 3 Médicos
+    private final int CAPACIDAD_MAXIMA = 8; // Puedes subir la capacidad si gustas
 
     public VentanaEmergencia() {
         setTitle("Sala de Emergencias - Productor / Consumidor");
-        setSize(750, 420);
+        setSize(850, 480);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
@@ -47,6 +50,7 @@ public class VentanaEmergencia extends JFrame {
         pnlProd.add(new JLabel("Ingreso de Pacientes", SwingConstants.CENTER));
         lblSemProd = new JLabel("● Semáforo", SwingConstants.CENTER);
         lblSemProd.setForeground(Color.GRAY);
+        lblSemProd.setFont(new Font("Arial", Font.BOLD, 14));
         pnlProd.add(lblSemProd);
         panelCentro.add(pnlProd);
 
@@ -62,18 +66,27 @@ public class VentanaEmergencia extends JFrame {
         panelCentro.add(pnlBuff);
 
         // 3. Médicos (Consumidores)
-        JPanel pnlCons = new JPanel(new GridLayout(4, 1));
-        pnlCons.setBorder(BorderFactory.createTitledBorder("Consultorios (Consumidores)"));
+        JPanel pnlCons = new JPanel(new GridLayout(6, 1, 2, 2));
+        pnlCons.setBorder(BorderFactory.createTitledBorder("Consultorios (3 Médicos)"));
+
         lblMed1 = new JLabel("Médico 1: Inactivo");
         lblSemMed1 = new JLabel("● Semáforo M1");
         lblSemMed1.setForeground(Color.GRAY);
+
         lblMed2 = new JLabel("Médico 2: Inactivo");
         lblSemMed2 = new JLabel("● Semáforo M2");
         lblSemMed2.setForeground(Color.GRAY);
+
+        lblMed3 = new JLabel("Médico 3: Inactivo");
+        lblSemMed3 = new JLabel("● Semáforo M3");
+        lblSemMed3.setForeground(Color.GRAY);
+
         pnlCons.add(lblMed1);
         pnlCons.add(lblSemMed1);
         pnlCons.add(lblMed2);
         pnlCons.add(lblSemMed2);
+        pnlCons.add(lblMed3);
+        pnlCons.add(lblSemMed3);
         panelCentro.add(pnlCons);
 
         add(panelCentro, BorderLayout.CENTER);
@@ -82,12 +95,16 @@ public class VentanaEmergencia extends JFrame {
     private void iniciarSimulacion() {
         buffer = new BufferEmergencia(CAPACIDAD_MAXIMA, this);
         productor = new ProductorPacientes(buffer);
+
+        // Creamos los 3 médicos consumidores
         medico1 = new MedicoConsumidor(1, buffer, this);
         medico2 = new MedicoConsumidor(2, buffer, this);
+        medico3 = new MedicoConsumidor(3, buffer, this);
 
         productor.start();
         medico1.start();
         medico2.start();
+        medico3.start();
 
         btnPlay.setEnabled(false);
         btnStop.setEnabled(true);
@@ -97,10 +114,12 @@ public class VentanaEmergencia extends JFrame {
         if (productor != null) productor.detener();
         if (medico1 != null) medico1.detener();
         if (medico2 != null) medico2.detener();
+        if (medico3 != null) medico3.detener();
 
         lblSemProd.setForeground(Color.GRAY);
         lblSemMed1.setForeground(Color.GRAY);
         lblSemMed2.setForeground(Color.GRAY);
+        lblSemMed3.setForeground(Color.GRAY);
 
         btnPlay.setEnabled(true);
         btnStop.setEnabled(false);
@@ -120,13 +139,15 @@ public class VentanaEmergencia extends JFrame {
         SwingUtilities.invokeLater(() -> {
             Color color = atendiendo ? Color.GREEN : Color.RED;
             if (medicoId == 1) lblSemMed1.setForeground(color);
-            else lblSemMed2.setForeground(color);
+            else if (medicoId == 2) lblSemMed2.setForeground(color);
+            else if (medicoId == 3) lblSemMed3.setForeground(color);
         });
     }
 
     public void setEstadoMedico(int id, String texto) {
         if (id == 1) lblMed1.setText("Médico 1: " + texto);
-        else lblMed2.setText("Médico 2: " + texto);
+        else if (id == 2) lblMed2.setText("Médico 2: " + texto);
+        else if (id == 3) lblMed3.setText("Médico 3: " + texto);
     }
 
     public static void main(String[] args) {

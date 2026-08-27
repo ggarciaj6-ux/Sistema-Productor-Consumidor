@@ -25,7 +25,7 @@ public class MedicoConsumidor extends Thread {
                 String paciente = buffer.atenderPaciente(id);
 
                 SwingUtilities.invokeLater(() -> gui.setEstadoMedico(id, "Atendiendo a " + paciente));
-                Thread.sleep(3000 + (long)(Math.random() * 2000)); // Atiende 3 - 5 seg
+                Thread.sleep(5000 + (long)(Math.random() * 3000)); // Atiende 3 - 5 seg
             } catch (InterruptedException e) {
                 break;
             }
